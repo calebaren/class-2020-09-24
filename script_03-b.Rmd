@@ -50,9 +50,49 @@ sep_new <-
 
 a) Make a table using **gt** which shows the five courses with the biggest increase. Use the [How to make a table](https://davidkane9.github.io/PPBDS/tools.html#how-to-make-a-table) section of *The Primer*.
 
+```{r}
+joined_increase <- sep_old %>%
+  inner_join(sep_new, 
+             by = c("id", "title", "name", "department"),
+             suffix = c("_old", "_new")) %>%
+  mutate(u_grad_diff = u_grad_new - u_grad_old) %>%
+  arrange(desc(u_grad_diff)) %>%
+  slice(1:5)
+
+joined_increase %>% gt()
+```
+
 b) Make a table using **gt** which shows the five courses with the biggest decrease.
 
+```{r}
+joined_decrease <- sep_old %>%
+  inner_join(sep_new, 
+             by = c("id", "title", "name", "department"),
+             suffix = c("_old", "_new")) %>%
+  mutate(u_grad_diff = u_grad_new - u_grad_old) %>%
+  arrange(u_grad_diff) %>%
+  slice(1:5)
+
+joined_decrease %>% gt()
+```
+
 c) Make a nice looking graphic which shows these 10 courses.
+
+```{r}
+ten_movers <- joined_increase %>%
+  full_join(joined_decrease %>% arrange(desc(u_grad_diff)),
+            by = c("id", "title", "name", "department", "u_grad_old",
+                   "u_grad_new", "u_grad_diff"))
+
+ten_movers %>%
+  ggplot(mapping = aes(x = reorder(title, u_grad_diff), y = u_grad_diff)) +
+  geom_col(aes(fill = u_grad_diff)) +
+  coord_flip() + 
+  labs(x = "Course Title",
+       y = "Enrollement Change",
+       title = "Fall 2020 Enrollment Change from Week 1 to Week 3") +
+  theme_bw()
+```
 
 d) Write down some thoughts about what might explain these increases and decreases. Or is it all just random? How would we know?
 
@@ -66,9 +106,17 @@ See [here](https://rpubs.com/dkane/week-3) for my answers. No need to copy exact
 
 **Prompt:** Dean Amanda Claybaugh is worried that the amount of work that some classes assigned in the first few weeks of class. Describe an ideal Preceptor Table with no missing data which would allow us to investigate this situation. What data is missing and why? 
 
+*Answer:* Control = enrollment during the first week
+Treatment = enrollment now (9/22)
+Missing data = courses missing between sep_old and sep_new
+
 With our actual Preceptor Table, how might we investigate the effect of work assigned in the first two weeks? Would the estimated Average Treatment Effect be accurate? Why or why not?
 
 Make a spreadsheet --- I recommend using Google sheets, but anything will do --- which shows a simple version of that actual Preceptor Table. What are the units? What are the outcomes? What is the treatment? What is the causal effect? You may assign whichever of the 10 classes you like to treatment and the rest to control.
+
+```{r}
+data.frame(c())
+```
 
 ## Scene 3
 
